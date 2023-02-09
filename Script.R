@@ -109,9 +109,10 @@ ranked_day <- ggplot(timeline_ranked, aes(rank, group = stock_symbol,
   labs(title = 'Date : {closest_state}',
        subtitle  =  "Tech Stock Prices",
        caption  = "Average Close Price For Month")
-N = 5000
+N = length(unique(timeline_ranked$date))
+P = 150
 
 ## animate
 
-animate(ranked_day,
-        nframes = N, fps = 20, width = 1200, height = 1000)
+animation <- animate(ranked_day,
+        nframes = N+P, fps = 15, width = 1200, end_pause = p, height = 1000)
