@@ -1,0 +1,18 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(tidyverse)
+library(tidytuesdayR)
+library(shiny)
+tuesdata <- tidytuesdayR::tt_load('2023-02-07')
+tuesdata$big_tech_stock_prices %>% glimpse
+```
+
+
+
+```{r}
+plot(cars)
+```
+
