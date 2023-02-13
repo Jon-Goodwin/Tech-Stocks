@@ -18,22 +18,41 @@ timeline <- big_stock_prices %>%
 
 ## Change table
 
+## Renaming
+tech_names_short <- c("Apple", "Adobe", "Amazon", "Salesforce", 
+                      "Cisco Systems", "Alphabet", "IBM", "Intel", "META", 
+                      "Microsoft", "Netflix", "Nvidia", "Oracle", "Tesla")
+
+tech_stock_rename <- tibble(stock_symbol = tech_names$stock_symbol, names = tech_names_short)
+
+
+
 timeline_ranked <- timeline %>%
+  mutate(date = format(date, "%Y-%m")) %>%
+  group_by(stock_symbol, date) %>%
+  summarise(adj_close = round(mean(adj_close), 2)) %>%
+  ungroup() %>%
   group_by(date) %>%
   mutate(rank = min_rank(-adj_close) * 1.0) %>%
-  ungroup() %>%
   select(stock_symbol, date, adj_close,rank)
+
+timeline_ranked <- full_join(timeline_ranked, tech_stock_rename, by = c("stock_symbol" = "stock_symbol"))
+
+timeline_ranked %>%
+  select(names, date, adj_close, rank)
 
 ## Create plots, Need to add better labels and titles.
 
-ranked_day <- ggplot(timeline_ranked, aes(rank, group = stock_symbol,
-                             fill = as.factor(stock_symbol))) +
+ranked_day <- ggplot(timeline_ranked, aes(rank, group = names,
+                             fill = as.factor(names))) +
   geom_tile(aes(y = adj_close/2, 
                 height = adj_close,
                 width = 0.9), alpha = 0.9, color = NA) +
   coord_flip(clip = "off", expand = FALSE) +
-  geom_text(aes(y = 0, label = paste(stock_symbol, " ")), vjust = 0.2, hjust = 1) +
-  geom_text(aes(y = adj_close, label = str_c("$",round(adj_close,2))), hjust=0) +
+  geom_text(aes(y = 0, label = paste(names, " ")), vjust = 0.2, hjust = 1,
+            fontface = "bold", size = 6) +
+  geom_text(aes(y = adj_close, label = str_c("$",round(adj_close,2))), hjust=0,
+            size = 5, fontface = "bold") +
   scale_y_continuous(labels = scales::comma) +
   scale_x_reverse() +
   guides(color = FALSE, fill = FALSE) +
@@ -58,12 +77,11 @@ ranked_day <- ggplot(timeline_ranked, aes(rank, group = stock_symbol,
   transition_states(date, transition_length = 4, state_length = 2) +
   view_follow(fixed_x = TRUE) + 
   labs(title = 'Date : {closest_state}',
-       subtitle  =  "Tech Stock Prices",
-       caption  = "Average Close Price For Month")
+       subtitle  =  "Tech Stock Prices")
 N = length(unique(timeline_ranked$date))
 P = 150
 
 ## animate
 
 animation <- animate(ranked_day,
-        nframes = N+P, fps = 15, width = 1200, end_pause = p, height = 1000)
+        nframes = N+P, fps = 10, width = 1400, end_pause = P, height = 1000)
