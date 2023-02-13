@@ -1,0 +1,49 @@
+---
+title: "The Rise of Big Tech"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidytuesdayR)
+library(scales)
+library(lubridate)
+```
+
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2023-02-07')
+tech_prices <- tuesdata$big_tech_stock_prices
+tech_names <- tuesdata$big_tech_companies
+```
+
+# Keywords: Meta, Tech, Social Media, Search, AI
+
+# Introduction {#Intro}
+
+```{r, echo = FALSE}
+### Implementing common company names
+
+tech_names_short <- c("Apple", "Adobe", "Amazon", "Salesforce", 
+                      "Cisco Systems", "Google", "IBM", "Intel", "Meta", 
+                      "Microsoft", "Netflix", "Nvidia", "Oracle", "Tesla")
+
+
+tech_stock_rename <- tibble(stock_symbol = tech_names$stock_symbol,
+                            names = tech_names_short)
+
+tech_stocks <- full_join(tech_prices, tech_stock_rename,
+                         by = c("stock_symbol" = "stock_symbol")) %>%
+  select(-stock_symbol)
+  
+tech_stocks %>%
+  filter(date == "2010-01-04") %>%
+  mutate(names = fct_reorder(names, adj_close)) %>%
+  ggplot(aes(x = names, y = adj_close, fill = names)) +
+  geom_col() +
+  coord_flip() +
+  theme(legend.position = "none")
+```
+
+
+
